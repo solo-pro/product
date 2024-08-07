@@ -3,6 +3,10 @@ plugins {
     id 'org.springframework.boot' version '3.3.2'
     id 'io.spring.dependency-management' version '1.1.6'
     id 'com.netflix.dgs.codegen' version '6.2.1'
+
+//    id 'com.diffplug.spotless' version '6.11.0'
+    id 'jacoco'
+    id "org.sonarqube" version "4.4.1.3373"
 }
 
 group = 'com.ecommer'
@@ -13,6 +17,109 @@ java {
         languageVersion = JavaLanguageVersion.of(17)
     }
 }
+
+// Jacoco 리포트 파일들을 저장할 디렉토리
+def jacocoDir = layout.buildDirectory.dir("reports/")
+//특정 클래스 파일을 Jacoco 리포트에서 제외
+private excludedClassFilesForReport(classDirectories) {
+    classDirectories.setFrom(
+            files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: [
+                        "**/Q*",
+                        "**/*DTO*",
+                        "**/*Code*",
+                        "**/*Exception*",
+                        "**/*Develop*",
+                        "**/*Application*",
+                        "**/*Config*",
+                        "**/DgsConstants.java",
+                        "**/DgsConstants.class",
+                        "**/*Request*",
+                        "**/*Response*",
+                ])
+            })
+    )
+}
+// 소나 클라우드 설정
+sonar {
+    properties {
+        property "sonar.projectKey", "Compono-Team_I-backend"
+        property "sonar.organization", "compono-team"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property 'sonar.sources', 'src'
+        property 'sonar.language', 'java'
+        property 'sonar.sourceEncoding', 'UTF-8'
+        property 'sonar.exclusions', '**/test/**, **/Q*.java, **/*Doc*.java, **/resources/** ,**/*Application*.java , **/*Config*.java,' +
+                '**/*Dto*.java,**/*DTO*.java, **/*Request*.java, **/*Response*.java ,**/*Exception*.java ,**/*ErrorCode*.java'
+        property 'sonar.test.inclusions', '**/*Test.java'
+        property 'sonar.java.coveragePlugin', 'jacoco'
+        property 'sonar.coverage.jacoco.xmlReportPaths', jacocoDir.get().file("jacoco/index.xml").asFile
+    }
+}
+// 자코코 버전 선택
+jacoco {
+    toolVersion = "0.8.8"
+}
+//테스트 리포트 생성 설정
+jacocoTestReport {
+    dependsOn test
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        csv.required.set(true)
+        html.destination jacocoDir.get().file("jacoco/index.html").asFile
+        xml.destination jacocoDir.get().file("jacoco/index.xml").asFile
+        csv.destination jacocoDir.get().file("jacoco/index.csv").asFile
+    }
+
+    excludedClassFilesForReport(classDirectories)
+
+    finalizedBy 'jacocoTestCoverageVerification'
+}
+//테스트 커버리지 규칙 정의하고 검증
+jacocoTestCoverageVerification {
+    excludedClassFilesForReport(classDirectories)
+
+    violationRules {
+        rule {
+            // rule 활성화
+            enabled = true
+
+            // 클래스 단위로 룰 체크
+            element = 'CLASS'
+
+            // 라인 커버리지를 최소 70% 만족
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.70
+            }
+
+//            excludes = jacocoExcludePatterns
+        }
+    }
+}
+//코드 포맷팅 규칙 정의
+//spotless {
+//    java {
+//        target("**/*.java")
+//        importOrder() // import 순서 정의
+//        removeUnusedImports() // 사용하지 않는 import 제거
+//        trimTrailingWhitespace() // 공백 제거
+//        endWithNewline() // 끝부분 NewLine 처리
+//        googleJavaFormat().aosp() // google java format
+//    }
+//}
+// pre-commit spotless check script
+//커밋 전에 코드 컨벤션이 잘못된게 있는지 검사
+tasks.register('updateGitHooks', Copy) {
+    from './scripts/pre-commit'
+    into './.git/hooks'
+    fileMode 0775
+}
+compileJava.dependsOn updateGitHooks
+
+
 
 configurations {
     compileOnly {
@@ -47,4 +154,5 @@ generateJava {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy 'jacocoTestReport'
 }

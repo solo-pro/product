@@ -1,0 +1,12 @@
+#!/bin/sh
+# Part 1 스테이지에 올라간 파일 가져오기
+stagedFiles=$(git diff --staged --name-only)
+# Part 2 코드 컨벤션 적용 명령어
+echo "Running spotlessApply. Formatting code..."
+./gradlew spotlessApply --daemon
+# Part 3 스테이지에 올라간 파일중 코드 컨벤션 적용으로 인해 수정된 파일이 있으면 다시 git add
+for file in $stagedFiles; do
+  if test -f "$file"; then
+    git add "$file"
+  fi
+done
