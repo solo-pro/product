@@ -43,8 +43,8 @@ private excludedClassFilesForReport(classDirectories) {
 // 소나 클라우드 설정
 sonar {
     properties {
-        property "sonar.projectKey", "Compono-Team_I-backend"
-        property "sonar.organization", "compono-team"
+        property "sonar.projectKey", "solo-pro_product"
+        property "sonar.organization", "solo-pro"
         property "sonar.host.url", "https://sonarcloud.io"
         property 'sonar.sources', 'src'
         property 'sonar.language', 'java'
