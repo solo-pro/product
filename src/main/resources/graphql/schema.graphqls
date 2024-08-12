@@ -1,0 +1,88 @@
+
+type Category {
+    id: ID!
+    name: String!
+    description: String
+    createdTimeStamps: String
+    updatedTimeStamps: String
+}
+
+type Product {
+    id: ID!
+    name: String!
+    price: Int!
+    stock: Int!
+    mainImage: String
+    description: String
+    category: Category
+    version: String
+    deleted: Boolean!
+    createdTimeStamps: String
+    updatedTimeStamps: String
+}
+
+type PageInfo {
+    totalItems: Int!
+    totalPages: Int!
+    currentPage: Int!
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+}
+
+type ProductPage {
+    items: [Product!]!
+    pageInfo: PageInfo!
+}
+
+type Query {
+    products(
+        name: String,
+        overprice: Int,
+        underprice: Int,
+        offset: Int = 0,
+        limit: Int = 10
+    ): ProductPage
+
+    product(id: ID!): Product
+
+    categories: [Category]
+
+    category(id: ID!): Category
+}
+
+type Mutation {
+    addProduct(
+        name: String!,
+        price: Int!,
+        stock: Int!,
+        mainImage: String,
+        description: String,
+        categoryId: ID!
+    ): Product
+
+    updateProduct(
+        id: ID!,
+        name: String,
+        price: Int,
+        stock: Int,
+        mainImage: String,
+        description: String,
+        categoryId: ID!,
+        deleted: Boolean
+    ): Product
+
+    deleteProduct(id: ID!): Boolean
+
+    addCategory(
+        name: String!,
+        description: String
+    ): Category
+
+    updateCategory(
+        id: ID!,
+        name: String,
+        description: String
+    ): Category
+
+    deleteCategory(id: ID!): Boolean
+}
