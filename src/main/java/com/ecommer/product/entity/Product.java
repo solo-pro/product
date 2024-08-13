@@ -2,10 +2,7 @@ package com.ecommer.product.entity;
 
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Column;
@@ -33,7 +30,7 @@ public class Product {
     @Column("PRODUCT_DESCRIPTION")
     private String description;
     @Column("PRODUCT_CATEGORY_ID")
-    private Long categoryId;
+    private long categoryId;
     @Version
     @Column("PRODUCT_VERSION")
     private Long version;
@@ -42,8 +39,25 @@ public class Product {
     private boolean deleted = false;
     @Column("PRODUCT_CREATED_TIME_STAMPS")
     @Builder.Default
-    private Long createdTimeStamps = System.currentTimeMillis();
+    private long createdTimeStamps = System.currentTimeMillis();
     @Column("PRODUCT_UPDATED_TIME_STAMPS")
     @Builder.Default
-    private Long updatedTimeStamps = System.currentTimeMillis();
+    private long updatedTimeStamps = System.currentTimeMillis();
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", stock=" + stock +
+                ", mainImage='" + mainImage + '\'' +
+                ", description='" + description + '\'' +
+                ", categoryId=" + categoryId +
+                ", version=" + version +
+                ", deleted=" + deleted +
+                ", createdTimeStamps=" + createdTimeStamps +
+                ", updatedTimeStamps=" + updatedTimeStamps +
+                '}';
+    }
 }

@@ -1,8 +1,49 @@
+# 인풋 타입 정의
+input ProductInput {
+    name: String!
+    price: Int!
+    stock: Int!
+    mainImage: String
+    description: String
+    categoryId: ID!
+}
 
+input ProductUpdateInput {
+    id: ID!
+    name: String
+    price: Int
+    stock: Int
+    mainImage: String
+    description: String
+    categoryId: ID
+    deleted: Boolean
+}
+
+input CategoryInput {
+    name: String!
+    description: String
+}
+
+input CategoryUpdateInput {
+    id: ID!
+    name: String
+    description: String
+}
+
+# 페이징 정보 타입
+type PageInfo {
+    totalItems: Int!
+    totalPages: Int!
+    currentPage: Int!
+    hasNextPage: Boolean!
+}
+
+# 데이터 타입 정의
 type Category {
     id: ID!
     name: String!
     description: String
+    products: [Product]
     createdTimeStamps: String
     updatedTimeStamps: String
 }
@@ -15,31 +56,24 @@ type Product {
     mainImage: String
     description: String
     category: Category
-    version: String
-    deleted: Boolean!
     createdTimeStamps: String
     updatedTimeStamps: String
 }
 
-type PageInfo {
-    totalItems: Int!
-    totalPages: Int!
-    currentPage: Int!
-    hasNextPage: Boolean!
-    hasPreviousPage: Boolean!
-}
-
+# Product 페이징 타입 정의
 type ProductPage {
     items: [Product!]!
     pageInfo: PageInfo!
 }
 
+# Query 타입 정의 (데이터 조회용)
 type Query {
     products(
         name: String,
         overprice: Int,
         underprice: Int,
-        offset: Int = 0,
+        category: Int,
+        page: Int = 0,
         limit: Int = 10
     ): ProductPage
 
@@ -50,39 +84,17 @@ type Query {
     category(id: ID!): Category
 }
 
+# Mutation 타입 정의 (데이터 변경용)
 type Mutation {
-    addProduct(
-        name: String!,
-        price: Int!,
-        stock: Int!,
-        mainImage: String,
-        description: String,
-        categoryId: ID!
-    ): Product
+    addProduct(input: ProductInput!): Product
 
-    updateProduct(
-        id: ID!,
-        name: String,
-        price: Int,
-        stock: Int,
-        mainImage: String,
-        description: String,
-        categoryId: ID!,
-        deleted: Boolean
-    ): Product
+    updateProduct(input: ProductUpdateInput!): Product
 
     deleteProduct(id: ID!): Boolean
 
-    addCategory(
-        name: String!,
-        description: String
-    ): Category
+    addCategory(input: CategoryInput!): Category
 
-    updateCategory(
-        id: ID!,
-        name: String,
-        description: String
-    ): Category
+    updateCategory(input: CategoryUpdateInput!): Category
 
     deleteCategory(id: ID!): Boolean
 }
