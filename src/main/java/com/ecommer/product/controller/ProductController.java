@@ -13,19 +13,19 @@ import reactor.core.publisher.Flux;
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductRepository productRepository;
-    @QueryMapping
-    public Flux<Product> products(
-            @Argument String name,
-            @Argument Long category,
-            @Argument Long overprice,
-            @Argument Long underprice,
-            @Argument Integer page,
-            @Argument Integer limit
-    ) {
-
-
-        return null;
-    }
+//    @QueryMapping
+//    public Flux<Product> products(
+//            @Argument String name,
+//            @Argument Long category,
+//            @Argument Long overprice,
+//            @Argument Long underprice,
+//            @Argument Integer page,
+//            @Argument Integer limit
+//    ) {
+//
+//
+//        return null;
+//    }
 }
 
 

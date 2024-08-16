@@ -30,6 +30,15 @@ input CategoryUpdateInput {
     description: String
 }
 
+# 데이터 타입 정의
+type Category {
+    id: ID!
+    name: String!
+    description: String
+    createdTimeStamps: String
+    updatedTimeStamps: String
+}
+
 # 페이징 정보 타입
 type PageInfo {
     totalItems: Int!
@@ -38,31 +47,21 @@ type PageInfo {
     hasNextPage: Boolean!
 }
 
-# 데이터 타입 정의
-type Category {
-    id: ID!
-    name: String!
-    description: String
-    products: [Product]
-    createdTimeStamps: String
-    updatedTimeStamps: String
-}
-
 type Product {
-    id: ID!
-    name: String!
-    price: Int!
-    stock: Int!
+    id: ID
+    name: String
+    price: Int
+    stock: Int
     mainImage: String
     description: String
-    category: Category
     createdTimeStamps: String
     updatedTimeStamps: String
+    category: Category
 }
 
 # Product 페이징 타입 정의
 type ProductPage {
-    items: [Product!]!
+    items: [Product]
     pageInfo: PageInfo!
 }
 
@@ -72,10 +71,10 @@ type Query {
         name: String,
         overprice: Int,
         underprice: Int,
-        category: Int,
+        categoryId: Int,
         page: Int = 0,
-        limit: Int = 10
-    ): ProductPage
+        size: Int = 10
+    ): [Product]
 
     product(id: ID!): Product
 
