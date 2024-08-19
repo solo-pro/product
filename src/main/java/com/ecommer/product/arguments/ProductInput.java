@@ -1,4 +1,4 @@
-package com.ecommer.product.argument;
+package com.ecommer.product.arguments;
 
 import ch.qos.logback.core.util.StringUtil;
 
@@ -11,7 +11,7 @@ public record ProductInput(
         String mainImage
 ) {
     public ProductInput {
-        if (StringUtil.notNullNorEmpty(name)) {
+        if (StringUtil.isNullOrEmpty(name)) {
             throw new IllegalArgumentException("Product name is required");
         }
         if (price <= 0) {

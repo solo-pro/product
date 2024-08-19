@@ -12,6 +12,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 
 
+
 @Table("PRODUCTS")
 @Getter
 @Builder

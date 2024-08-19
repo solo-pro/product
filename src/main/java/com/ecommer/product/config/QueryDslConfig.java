@@ -1,8 +1,5 @@
 package com.ecommer.product.config;
 
-import com.google.common.base.CaseFormat;
-import com.infobip.spring.data.jdbc.annotation.processor.ProjectColumnCaseFormat;
-import com.infobip.spring.data.jdbc.annotation.processor.ProjectTableCaseFormat;
 import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLTemplates;
 import org.springframework.context.annotation.Bean;

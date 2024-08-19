@@ -1,4 +1,4 @@
-package com.ecommer.product.argument;
+package com.ecommer.product.arguments;
 
 import ch.qos.logback.core.util.StringUtil;
 

@@ -23,7 +23,19 @@ public class ProductResponse{
 //    private String categoryDescription;
 //    private Long categoryCreatedTimeStamps;
 //    private Long categoryUpdatedTimeStamps;
-
+    public static ProductResponse from(Product product) {
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStock(),
+                product.getMainImage(),
+                product.getCreatedTimeStamps(),
+                product.getUpdatedTimeStamps(),
+                null
+        );
+    }
     public static ProductResponse from(Product product, Category category) {
         return new ProductResponse(
                 product.getId(),

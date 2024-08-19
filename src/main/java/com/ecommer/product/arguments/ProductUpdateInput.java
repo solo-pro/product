@@ -1,10 +1,10 @@
-package com.ecommer.product.argument;
+package com.ecommer.product.arguments;
 
 public record ProductUpdateInput(
         long id,
         String name,
         String description,
-        Double price,
+        Long price,
         Long categoryId,
         Long stock,
         String mainImage,

@@ -3,6 +3,8 @@ plugins {
     id 'org.springframework.boot' version '3.3.2'
     id 'io.spring.dependency-management' version '1.1.6'
 
+
+    id 'com.netflix.dgs.codegen' version '6.2.1'
     id 'com.diffplug.spotless' version '6.25.0'
     id 'jacoco'
     id "org.sonarqube" version "5.1.0.4882"
@@ -35,6 +37,8 @@ private excludedClassFilesForReport(classDirectories) {
                         "**/DgsConstants.class",
                         "**/*Request*",
                         "**/*Response*",
+                        "**/fetchers/**",
+                        "**/arguments/**"
                 ])
             })
     )
@@ -49,7 +53,8 @@ sonar {
         property 'sonar.language', 'java'
         property 'sonar.sourceEncoding', 'UTF-8'
         property 'sonar.exclusions', '**/test/**, **/Q*.java, **/*Doc*.java, **/resources/** ,**/*Application*.java , **/*Config*.java,' +
-                '**/*Dto*.java,**/*DTO*.java, **/*Request*.java, **/*Response*.java ,**/*Exception*.java ,**/*ErrorCode*.java'
+                '**/*Dto*.java, **/*DTO*.java, **/*Request*.java, **/*Response*.java ,**/*Exception*.java ,**/*ErrorCode*.java, **/arguments/**, ' +
+                '**/fetchers/**, **/mutations/**, **/queries/**, **/subscriptions/**, **/types/**, **/utils/**, **/codegen/**'
         property 'sonar.test.inclusions', '**/*Test.java'
         property 'sonar.java.coveragePlugin', 'jacoco'
         property 'sonar.coverage.jacoco.xmlReportPaths', jacocoDir.get().file("jacoco/index.xml").asFile
@@ -129,7 +134,9 @@ configurations {
 repositories {
     mavenCentral()
 }
-
+ext {
+    set('netflixDgsVersion', "9.0.4")
+}
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
@@ -138,6 +145,8 @@ dependencies {
 
     implementation 'com.infobip:infobip-spring-data-r2dbc-querydsl-boot-starter:9.0.7'
     annotationProcessor 'com.infobip:infobip-spring-data-jdbc-annotation-processor:9.0.7'
+
+    implementation 'com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter'
 
 
 //    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
@@ -158,9 +167,23 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation "com.netflix.graphql.dgs:graphql-dgs-client"
     testImplementation 'org.springframework.graphql:spring-graphql-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
+dependencyManagement {
+    imports {
+        mavenBom "com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:${netflixDgsVersion}"
+    }
+}
+
+generateJava {
+    schemaPaths = ["${projectDir}/src/main/resources/graphql/"]
+    packageName = 'com.ecommer.product.codegen'
+    generateClient = true
+}
+
 
 tasks.named('test') {
     useJUnitPlatform()
