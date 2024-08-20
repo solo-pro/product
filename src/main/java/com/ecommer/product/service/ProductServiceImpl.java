@@ -10,19 +10,20 @@ import com.ecommer.product.response.ProductResponse;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.sql.SQLQuery;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
 import java.util.function.Function;
 
+import static com.ecommer.product.entity.QCategory.category;
 import static com.ecommer.product.entity.QProduct.product;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
-public class ProductServiceImpl implements ProductService, ProductInputBooleanExpression {
+public class ProductServiceImpl implements ProductService, ProductInputBooleanExpression, ProductDao {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
@@ -46,14 +47,18 @@ public class ProductServiceImpl implements ProductService, ProductInputBooleanEx
                 );
     }
 
-    public @NotNull Function<SQLQuery<?>, SQLQuery<Product>> getSqlQueryProductConditions(String name, Integer overprice, Integer underprice, Integer categoryId, long page, Integer size) {
+    @Override
+    public Function<SQLQuery<?>, SQLQuery<Product>> getSqlQueryProductConditions(String name, Integer overprice, Integer underprice, Integer categoryId, long page, Integer size) {
         return sqlQuery -> sqlQuery.select(product)
                 .from(product)
                 .where(containsName(name)
                         , goePrice(overprice)
                         , loePrice(underprice)
                         , eqCategoryId(categoryId)
+                        , product.deleted.eq(false)
                 )
+                .join(category)
+                .on(product.categoryId.eq(category.id))
                 .orderBy(product.id.desc())
                 .offset(page * size)
                 .limit(size);
@@ -61,15 +66,29 @@ public class ProductServiceImpl implements ProductService, ProductInputBooleanEx
 
     @Override
     public Mono<Product> addProduct(ProductInput input) {
-        Product addProduct = Product.builder()
-                .name(input.name())
-                .price(input.price())
-                .stock(input.stock())
-                .mainImage(input.mainImage())
-                .description(input.description())
-                .categoryId(input.categoryId())
-                .build();
-        return productRepository.save(addProduct);
+        return categoryRepository.findById(input.categoryId())
+                .switchIfEmpty(Mono.error(new RuntimeException("Category not found")))
+                .flatMap(category -> {
+                    Product addProduct = Product.builder()
+                            .name(input.name())
+                            .price(input.price())
+                            .stock(input.stock())
+                            .mainImage(input.mainImage())
+                            .description(input.description())
+                            .categoryId(input.categoryId())
+                            .build();
+                    return productRepository.save(addProduct);
+                });
+    }
+    @Override
+    public Function<SQLQuery<?>, SQLQuery<Product>> getSqlQueryProductById(Long id) {
+        return sqlQuery -> sqlQuery.select(product)
+                .from(product)
+                .where(product.id.eq(id), product.deleted.eq(false));
+    }
+    @Override
+    public Mono<Product> getProductById(Long id) {
+        return productRepository.query(getSqlQueryProductById(id)).one();
     }
 
     @Override
@@ -88,7 +107,14 @@ public class ProductServiceImpl implements ProductService, ProductInputBooleanEx
 
     @Override
     public Mono<Void> deleteProductById(long id) {
-        return productRepository.deleteById(id);
+        return productRepository.findById(id)
+                .switchIfEmpty(Mono.error(new RuntimeException("Product not found")))
+                .flatMap(product -> {
+                    product.delete();
+                    productRepository.save(product);
+                    return Mono.empty();
+                });
+
     }
 
 
@@ -116,10 +142,7 @@ public class ProductServiceImpl implements ProductService, ProductInputBooleanEx
         return null;
     }
 
-    @Override
-    public Mono<Product> getProductById(Long id) {
-        return productRepository.findById(id);
-    }
+
     @Override
     public BooleanExpression eqCategoryId(Integer categoryId) {
         if (categoryId != null) {

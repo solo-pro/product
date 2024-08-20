@@ -63,4 +63,7 @@ public class Product {
                 ", updatedTimeStamps=" + updatedTimeStamps +
                 '}';
     }
+    public void delete(){
+        this.deleted = true;
+    }
 }
