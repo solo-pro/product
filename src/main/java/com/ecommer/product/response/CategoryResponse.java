@@ -4,15 +4,14 @@ import com.ecommer.product.entity.Category;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@Getter
-@AllArgsConstructor
-public class CategoryResponse {
-    private Long id;
-    private String name;
-    private String description;
-    private Long createdTimeStamps;
-    private Long updatedTimeStamps;
 
+public record CategoryResponse(
+        Long id,
+        String name,
+        String description,
+        Long createdTimeStamps,
+        Long updatedTimeStamps
+) {
     public static CategoryResponse from(Category category) {
         if(category == null) {
             return null;

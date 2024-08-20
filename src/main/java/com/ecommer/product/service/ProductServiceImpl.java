@@ -52,8 +52,8 @@ public class ProductServiceImpl implements ProductService, ProductInputBooleanEx
         return sqlQuery -> sqlQuery.select(product)
                 .from(product)
                 .where(containsName(name)
-                        , goePrice(overprice)
-                        , loePrice(underprice)
+                        , goePrice(underprice)
+                        , loePrice(overprice)
                         , eqCategoryId(categoryId)
                         , product.deleted.eq(false)
                 )
@@ -119,17 +119,17 @@ public class ProductServiceImpl implements ProductService, ProductInputBooleanEx
 
 
     @Override
-    public BooleanExpression loePrice(Integer underprice) {
-        if (underprice != null) {
-            return product.price.loe(underprice);
+    public BooleanExpression loePrice(Integer overprice) {
+        if (overprice != null) {
+            return product.price.loe(overprice);
         }
         return null;
     }
 
     @Override
-    public BooleanExpression goePrice(Integer overprice) {
-        if (overprice != null) {
-            return product.price.goe(overprice);
+    public BooleanExpression goePrice(Integer underprice) {
+        if (underprice != null) {
+            return product.price.goe(underprice);
         }
         return null;
     }

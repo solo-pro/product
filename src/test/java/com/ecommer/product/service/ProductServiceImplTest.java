@@ -85,7 +85,7 @@ class ProductServiceImplTest {
             StepVerifier.create(productResponses)
                     .expectNextMatches(response ->
                             response.name().equals("Test Product") &&
-                                    response.category().getName().equals("Electronics")
+                                    response.category().name().equals("Electronics")
                     )
                     .verifyComplete();
         }
@@ -108,7 +108,7 @@ class ProductServiceImplTest {
             StepVerifier.create(productResponses)
                     .expectNextMatches(response ->
                             response.name().equals("Test Product") &&
-                                    response.category().getName().equals("Electronics")
+                                    response.category().name().equals("Electronics")
                     )
                     .verifyComplete();
         }
@@ -131,7 +131,7 @@ class ProductServiceImplTest {
             StepVerifier.create(productResponses)
                     .expectNextMatches(response ->
                             response.name().equals("Test Product") &&
-                                    response.category().getName().equals("Electronics")
+                                    response.category().name().equals("Electronics")
                     )
                     .verifyComplete();
         }
@@ -198,8 +198,8 @@ class ProductServiceImplTest {
 
             // Arrange
             Predicate containsName = qProduct.name.containsIgnoreCase("Test");
-            Predicate goePrice = qProduct.price.goe(500);
-            Predicate loePrice = qProduct.price.loe(1500);
+            Predicate goePrice = qProduct.price.goe(1500);
+            Predicate loePrice = qProduct.price.loe(500);
             Predicate eqCategoryId = qProduct.categoryId.eq(1L);
 
             // Ensure that where method is stubbed with specific arguments
@@ -518,7 +518,7 @@ class ProductServiceImplTest {
             RowsFetchSpec<Object> rowsFetchSpec = mock(RowsFetchSpec.class);
             when(productRepository.query(any())).thenReturn(rowsFetchSpec);
             product.delete();
-            when(rowsFetchSpec.one()).thenReturn(Mono.just(product));
+            when(rowsFetchSpec.one()).thenReturn(Mono.empty());
 
             Mono<Product> foundProduct = productService.getProductById(1L);
 
