@@ -4,14 +4,12 @@ import com.ecommer.product.arguments.ProductInput;
 import com.ecommer.product.arguments.ProductUpdateInput;
 import com.ecommer.product.entity.Category;
 import com.ecommer.product.entity.Product;
-import com.ecommer.product.entity.QCategory;
 import com.ecommer.product.entity.QProduct;
+import com.ecommer.product.queries.ProductQuery;
 import com.ecommer.product.repository.CategoryRepository;
 import com.ecommer.product.repository.ProductRepository;
 import com.ecommer.product.response.ProductResponse;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.sql.SQLQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,11 +22,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.function.Function;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,7 +32,8 @@ class ProductServiceImplTest {
     private ProductRepository productRepository;
     @Mock
     private CategoryRepository categoryRepository;
-
+    @Mock
+    private ProductQuery productQuery;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -188,213 +184,6 @@ class ProductServiceImplTest {
         }
     }
 
-    @Nested
-    class GetSqlQueryProductConditions{
-        @Test
-        void allConditions() {
-            // Mock SQLQuery and its methods
-            SQLQuery<Product> sqlQueryMock = mock(SQLQuery.class);
-            QProduct qProduct = QProduct.product;
-
-            // Arrange
-            Predicate containsName = qProduct.name.containsIgnoreCase("Test");
-            Predicate goePrice = qProduct.price.goe(1500);
-            Predicate loePrice = qProduct.price.loe(500);
-            Predicate eqCategoryId = qProduct.categoryId.eq(1L);
-
-            // Ensure that where method is stubbed with specific arguments
-            when(sqlQueryMock.select(qProduct)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.from(qProduct)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.where(containsName, goePrice, loePrice, eqCategoryId, deletedFalse)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.join(QCategory.category)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.on(qProduct.categoryId.eq(QCategory.category.id))).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.orderBy(qProduct.id.desc())).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.offset(anyLong())).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.limit(anyLong())).thenReturn(sqlQueryMock);
-
-            // Act
-            Function<SQLQuery<?>, SQLQuery<Product>> function = productService.getSqlQueryProductConditions(
-                    "Test", 500, 1500, 1, 0, 10);
-            SQLQuery<Product> resultQuery = function.apply(sqlQueryMock);
-
-            // Assert
-            verify(sqlQueryMock, times(1)).select(qProduct);
-            verify(sqlQueryMock, times(1)).from(qProduct);
-            verify(sqlQueryMock, times(1)).where(containsName, goePrice, loePrice, eqCategoryId, deletedFalse);
-            verify(sqlQueryMock, times(1)).join(QCategory.category);
-            verify(sqlQueryMock, times(1)).on(qProduct.categoryId.eq(QCategory.category.id));
-            verify(sqlQueryMock, times(1)).orderBy(qProduct.id.desc());
-            verify(sqlQueryMock, times(1)).offset(0L);
-            verify(sqlQueryMock, times(1)).limit(10L);
-
-            // Verify the function returned the expected query
-            assertSame(sqlQueryMock, resultQuery);
-        }
-        @Test
-        void noConditions() {
-            // Mock SQLQuery and its methods
-            SQLQuery<Product> sqlQueryMock = mock(SQLQuery.class);
-            QProduct qProduct = QProduct.product;
-
-            // Arrange
-            Predicate containsName = null;
-            Predicate goePrice = null;
-            Predicate loePrice = null;
-            Predicate eqCategoryId = null;
-
-            // Ensure that where method is stubbed with specific arguments
-            when(sqlQueryMock.select(qProduct)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.from(qProduct)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.where(containsName, goePrice, loePrice, eqCategoryId, deletedFalse)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.join(QCategory.category)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.on(qProduct.categoryId.eq(QCategory.category.id))).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.orderBy(qProduct.id.desc())).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.offset(anyLong())).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.limit(anyLong())).thenReturn(sqlQueryMock);
-
-            // Act
-            Function<SQLQuery<?>, SQLQuery<Product>> function = productService.getSqlQueryProductConditions(
-                    null, null, null, null, 0, 10);
-            SQLQuery<Product> resultQuery = function.apply(sqlQueryMock);
-
-            // Assert
-            verify(sqlQueryMock, times(1)).select(qProduct);
-            verify(sqlQueryMock, times(1)).from(qProduct);
-            verify(sqlQueryMock, times(1)).where(containsName, goePrice, loePrice, eqCategoryId, deletedFalse);
-            verify(sqlQueryMock, times(1)).join(QCategory.category);
-            verify(sqlQueryMock, times(1)).on(qProduct.categoryId.eq(QCategory.category.id));
-            verify(sqlQueryMock, times(1)).orderBy(qProduct.id.desc());
-            verify(sqlQueryMock, times(1)).offset(0L);
-            verify(sqlQueryMock, times(1)).limit(10L);
-
-            // Verify the function returned the expected query
-            assertSame(sqlQueryMock, resultQuery);
-        }
-        @Test
-        void onlyName(){
-            // Mock SQLQuery and its methods
-            SQLQuery<Product> sqlQueryMock = mock(SQLQuery.class);
-            QProduct qProduct = QProduct.product;
-
-            // Arrange
-            Predicate containsName = qProduct.name.containsIgnoreCase("Test");
-            Predicate goePrice = null;
-            Predicate loePrice = null;
-            Predicate eqCategoryId = null;
-
-
-            // Ensure that where method is stubbed with specific arguments
-            when(sqlQueryMock.select(qProduct)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.from(qProduct)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.where(containsName, goePrice, loePrice, eqCategoryId, deletedFalse)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.join(QCategory.category)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.on(qProduct.categoryId.eq(QCategory.category.id))).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.orderBy(qProduct.id.desc())).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.offset(anyLong())).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.limit(anyLong())).thenReturn(sqlQueryMock);
-
-            // Act
-            Function<SQLQuery<?>, SQLQuery<Product>> function = productService.getSqlQueryProductConditions(
-                    "Test", null, null, null, 0, 10);
-            SQLQuery<Product> resultQuery = function.apply(sqlQueryMock);
-
-            // Assert
-            verify(sqlQueryMock, times(1)).select(qProduct);
-            verify(sqlQueryMock, times(1)).from(qProduct);
-            verify(sqlQueryMock, times(1)).where(containsName, goePrice, loePrice, eqCategoryId, deletedFalse);
-            verify(sqlQueryMock, times(1)).join(QCategory.category);
-            verify(sqlQueryMock, times(1)).on(qProduct.categoryId.eq(QCategory.category.id));
-            verify(sqlQueryMock, times(1)).orderBy(qProduct.id.desc());
-            verify(sqlQueryMock, times(1)).offset(0L);
-            verify(sqlQueryMock, times(1)).limit(10L);
-
-            // Verify the function returned the expected query
-            assertSame(sqlQueryMock, resultQuery);
-        }
-
-    }
-
-    @Nested
-    class GetSqlQueryProductById{
-        @Test
-        void success() {
-            // Mock SQLQuery and its methods
-            SQLQuery<Product> sqlQueryMock = mock(SQLQuery.class);
-            QProduct qProduct = QProduct.product;
-
-            // Arrange
-            Predicate eqId = qProduct.id.eq(1L);
-
-            // Ensure that where method is stubbed with specific arguments
-            when(sqlQueryMock.select(qProduct)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.from(qProduct)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.where(eqId, deletedFalse)).thenReturn(sqlQueryMock);
-
-            // Act
-            Function<SQLQuery<?>, SQLQuery<Product>> function = productService.getSqlQueryProductById(1L);
-            SQLQuery<Product> resultQuery = function.apply(sqlQueryMock);
-
-            // Assert
-            verify(sqlQueryMock, times(1)).select(qProduct);
-            verify(sqlQueryMock, times(1)).from(qProduct);
-            verify(sqlQueryMock, times(1)).where(eqId, deletedFalse);
-
-            // Verify the function returned the expected query
-            assertSame(sqlQueryMock, resultQuery);
-        }
-        @Test
-        void failNotFoundDelete(){
-            // Mock SQLQuery and its methods
-            SQLQuery<Product> sqlQueryMock = mock(SQLQuery.class);
-            QProduct qProduct = QProduct.product;
-            product.delete();
-            // Arrange
-            Predicate eqId = qProduct.id.eq(1L);
-
-            // Ensure that where method is stubbed with specific arguments
-            when(sqlQueryMock.select(qProduct)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.from(qProduct)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.where(eqId, deletedFalse)).thenReturn(sqlQueryMock);
-
-            // Act
-            Function<SQLQuery<?>, SQLQuery<Product>> function = productService.getSqlQueryProductById(1L);
-            SQLQuery<Product> resultQuery = function.apply(sqlQueryMock);
-
-            // Assert
-            verify(sqlQueryMock, times(1)).select(qProduct);
-            verify(sqlQueryMock, times(1)).from(qProduct);
-            verify(sqlQueryMock, times(1)).where(eqId, deletedFalse);
-
-            // Verify the function returned the expected query
-            assertSame(sqlQueryMock, resultQuery);
-        }
-        @Test
-        void failNotFoundId(){
-            // Mock SQLQuery and its methods
-            SQLQuery<Product> sqlQueryMock = mock(SQLQuery.class);
-            QProduct qProduct = QProduct.product;
-
-            // Arrange
-            Predicate eqId = qProduct.id.eq(2L);
-
-            // Ensure that where method is stubbed with specific arguments
-            when(sqlQueryMock.select(qProduct)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.from(qProduct)).thenReturn(sqlQueryMock);
-            when(sqlQueryMock.where(eqId, deletedFalse)).thenReturn(sqlQueryMock);
-
-            // Act
-            Function<SQLQuery<?>, SQLQuery<Product>> function = productService.getSqlQueryProductById(2L);
-            SQLQuery<Product> resultQuery = function.apply(sqlQueryMock);
-
-            // Assert
-            verify(sqlQueryMock, times(1)).select(qProduct);
-            verify(sqlQueryMock, times(1)).from(qProduct);
-            verify(sqlQueryMock, times(1)).where(eqId, deletedFalse);
-
-            // Verify the function returned the expected query
-            assertSame(sqlQueryMock, resultQuery);
-        }
-    }
 
     @Nested
     class AddProduct{
@@ -531,48 +320,6 @@ class ProductServiceImplTest {
 
     }
 
-    @Nested
-    class TestBooleanExpressions{
-        @Test
-        void testLoePrice() {
-            BooleanExpression booleanExpression = productService.loePrice(1000);
-            assertNotNull(booleanExpression);
-        }
-        @Test
-        void testGoePrice() {
-            BooleanExpression booleanExpression = productService.goePrice(1000);
-            assertNotNull(booleanExpression);
-        }
-        @Test
-        void testContainsName() {
-            BooleanExpression booleanExpression = productService.containsName("Test");
-            assertNotNull(booleanExpression);
-        }
-        @Test
-        void testContainsName_Null() {
-            BooleanExpression booleanExpression = productService.containsName(null);
-            assertNull(booleanExpression);
-        }
-        @Test
-        void testLoePrice_Null() {
-            BooleanExpression booleanExpression = productService.loePrice(null);
-            assertNull(booleanExpression);
-        }
-        @Test
-        void testGoePrice_Null() {
-            BooleanExpression booleanExpression = productService.goePrice(null);
-            assertNull(booleanExpression);
-        }
-        @Test
-        void testEqCategoryId() {
-            BooleanExpression booleanExpression = productService.eqCategoryId(1);
-            assertNotNull(booleanExpression);
-        }
-        @Test
-        void testEqCategoryId_Null() {
-            BooleanExpression booleanExpression = productService.eqCategoryId(null);
-            assertNull(booleanExpression);
-        }
-    }
+
 
 }

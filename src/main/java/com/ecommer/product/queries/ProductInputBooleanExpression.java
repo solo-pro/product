@@ -1,4 +1,4 @@
-package com.ecommer.product.service;
+package com.ecommer.product.queries;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 
