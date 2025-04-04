@@ -78,7 +78,7 @@ type Query {
 
     product(id: ID!): Product
 
-#    categories: [Category]
+    categories: [Category]
 #
 #    category(id: ID!): Category
 }

@@ -139,7 +139,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.springframework.boot:spring-boot-starter-graphql'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'com.infobip:infobip-spring-data-r2dbc-querydsl-boot-starter:9.0.7'
     annotationProcessor 'com.infobip:infobip-spring-data-jdbc-annotation-processor:9.0.7'
 

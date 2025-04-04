@@ -1,5 +1,9 @@
 package com.ecommer.product.service;
 
-public interface CategoryService {
+import com.ecommer.product.response.CategoryResponse;
+import reactor.core.publisher.Flux;
 
+
+public interface CategoryService {
+    Flux<CategoryResponse> getAllCategories();
 }
