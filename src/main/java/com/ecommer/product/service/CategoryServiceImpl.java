@@ -13,7 +13,9 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService{
     private final CategoryRepository categoryRepository;
     @Override
-    public Flux<CategoryResponse> getAllCategories() {
-        return categoryRepository.findAll().map(CategoryResponse::from);
+    public Flux<CategoryResponse> getAllCategories(Integer page, Integer size) {
+        return categoryRepository.query(categoryRepository.getSqlQueryCategoryConditions(page, size))
+                .all()
+                .map(CategoryResponse::from);
     }
 }

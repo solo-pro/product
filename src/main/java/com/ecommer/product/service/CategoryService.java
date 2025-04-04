@@ -5,5 +5,5 @@ import reactor.core.publisher.Flux;
 
 
 public interface CategoryService {
-    Flux<CategoryResponse> getAllCategories();
+    Flux<CategoryResponse> getAllCategories(Integer page, Integer size);
 }

@@ -78,7 +78,10 @@ type Query {
 
     product(id: ID!): Product
 
-    categories: [Category]
+    categories(
+        page: Int = 0,
+        size: Int = 10
+    ): [Category]
 #
 #    category(id: ID!): Category
 }
