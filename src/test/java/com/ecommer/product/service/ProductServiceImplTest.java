@@ -1,10 +1,11 @@
 package com.ecommer.product.service;
 
-import com.ecommer.product.arguments.ProductInput;
-import com.ecommer.product.arguments.ProductUpdateInput;
+import com.ecommer.product.codegen.types.ProductInput;
+import com.ecommer.product.codegen.types.ProductUpdateInput;
 import com.ecommer.product.entity.Category;
 import com.ecommer.product.entity.Product;
 import com.ecommer.product.entity.QProduct;
+import com.ecommer.product.exception.ProductNotFound;
 import com.ecommer.product.queries.ProductQuery;
 import com.ecommer.product.repository.CategoryRepository;
 import com.ecommer.product.repository.ProductRepository;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -184,13 +186,12 @@ class ProductServiceImplTest {
         }
     }
 
-
     @Nested
     class AddProduct{
         @Test
         void success() {
             Long categoryId = 1L;
-            ProductInput input = new ProductInput("New Product", "New Description", 20, categoryId, 1500, "new_image.png");
+            ProductInput input = new ProductInput("New Product", 1500, 20, "new_image.png", "New Description",categoryId.toString());
             when(categoryRepository.findById(categoryId)).thenReturn(Mono.just(category));
             when(productRepository.save(any(Product.class))).thenReturn(Mono.just(product));
 
@@ -205,8 +206,8 @@ class ProductServiceImplTest {
         }
         @Test
         void fail_CategoryNotFound() {
-            long categoryId = 1L;
-            ProductInput input = new ProductInput("New Product", "New Description", 20, categoryId, 1500, "new_image.png");
+            Long categoryId = 1L;
+            ProductInput input = new ProductInput("New Product", 1500, 20, "new_image.png", "New Description",categoryId.toString());
             when(categoryRepository.findById(categoryId)).thenReturn(Mono.empty());
 
 
@@ -224,9 +225,9 @@ class ProductServiceImplTest {
     class UpdateProduct{
         @Test
         void success() {
-            ProductUpdateInput input = new ProductUpdateInput(1L, "Updated Product", "Updated Description", 20L, 1L, 2000L, "updated_image.png", false);
+            ProductUpdateInput input = new ProductUpdateInput("1", "Updated Product", 2000, 20, "updated_image.png", "Updated Description", "1", false);
+            when(productRepository.findById(Long.parseLong(input.getId()))).thenReturn(Mono.just(product));
             when(productRepository.save(any(Product.class))).thenReturn(Mono.just(product));
-
             Mono<Product> updatedProduct = productService.updateProduct(input);
 
             StepVerifier.create(updatedProduct)
@@ -234,6 +235,20 @@ class ProductServiceImplTest {
                     .verifyComplete();
 
             verify(productRepository, times(1)).save(any(Product.class));
+            assertEquals("Updated Product", product.getName());
+        }
+        @Test
+        void failNotFound(){
+            ProductUpdateInput input = new ProductUpdateInput("1", "Updated Product", 2000, 20, "updated_image.png", "Updated Description", "1", false);
+            when(productRepository.findById(Long.parseLong(input.getId()))).thenReturn(Mono.empty());
+            Mono<Product> updatedProduct = productService.updateProduct(input);
+
+            StepVerifier.create(updatedProduct)
+                    .expectError(ProductNotFound.class)
+                    .verify();
+
+            verify(productRepository, times(0)).save(any(Product.class));
+
         }
     }
 
@@ -255,14 +270,14 @@ class ProductServiceImplTest {
             assertTrue(product.isDeleted());
         }
         @Test
-        void fail_NotFound() {
+        void failNotFound() {
             Long id = 1L;
             when(productRepository.findById(id)).thenReturn(Mono.empty());
 
             Mono<Void> result = productService.deleteProductById(id);
 
             StepVerifier.create(result)
-                    .expectError(RuntimeException.class)
+                    .expectError(ProductNotFound.class)
                     .verify();
 
             verify(productRepository, times(1)).findById(id);
@@ -278,10 +293,10 @@ class ProductServiceImplTest {
             when(productRepository.query(any())).thenReturn(rowsFetchSpec);
             when(rowsFetchSpec.one()).thenReturn(Mono.just(product));
 
-            Mono<Product> foundProduct = productService.getProductById(1L);
+            Mono<ProductResponse> foundProduct = productService.getProductById(1L);
 
             StepVerifier.create(foundProduct)
-                    .expectNext(product)
+                    .expectNext(ProductResponse.from(product, category))
                     .verifyComplete();
 
             verify(productRepository, times(1)).query(any());
@@ -294,10 +309,10 @@ class ProductServiceImplTest {
             when(productRepository.query(any())).thenReturn(rowsFetchSpec);
             when(rowsFetchSpec.one()).thenReturn(Mono.empty());
 
-            Mono<Product> foundProduct = productService.getProductById(2L);
 
-            StepVerifier.create(foundProduct)
-                    .verifyComplete();
+            StepVerifier.create(productService.getProductById(2L))
+                    .expectError(ProductNotFound.class)
+                    .verify();
 
             verify(productRepository, times(1)).query(any());
             verify(rowsFetchSpec, times(1)).one();
@@ -309,10 +324,9 @@ class ProductServiceImplTest {
             product.delete();
             when(rowsFetchSpec.one()).thenReturn(Mono.empty());
 
-            Mono<Product> foundProduct = productService.getProductById(1L);
-
-            StepVerifier.create(foundProduct)
-                    .verifyComplete();
+            StepVerifier.create(productService.getProductById(2L))
+                    .expectError(ProductNotFound.class)
+                    .verify();
 
             verify(productRepository, times(1)).query(any());
             verify(rowsFetchSpec, times(1)).one();

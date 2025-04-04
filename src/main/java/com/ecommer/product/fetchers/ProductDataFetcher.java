@@ -1,7 +1,9 @@
 package com.ecommer.product.fetchers;
 
-import com.ecommer.product.arguments.ProductInput;
-import com.ecommer.product.arguments.ProductUpdateInput;
+
+
+import com.ecommer.product.codegen.types.ProductInput;
+import com.ecommer.product.codegen.types.ProductUpdateInput;
 import com.ecommer.product.entity.Product;
 import com.ecommer.product.response.ProductResponse;
 import com.ecommer.product.service.ProductService;
@@ -17,7 +19,6 @@ import reactor.core.publisher.Mono;
 public class ProductDataFetcher {
     private final ProductService productService;
 
-
     @DgsQuery
     public Flux<ProductResponse> products(
             @InputArgument String name
@@ -28,6 +29,7 @@ public class ProductDataFetcher {
             , @InputArgument Integer size
             , DgsDataFetchingEnvironment dataFetchingEnvironment
     ) {
+
         var category = dataFetchingEnvironment.getField()
                 .getSelectionSet()
                 .getSelections()
@@ -45,7 +47,7 @@ public class ProductDataFetcher {
 
 
     @DgsQuery
-    public Mono<Product> product(@InputArgument String id) {
+    public Mono<ProductResponse> product(@InputArgument String id) {
         return productService.getProductById(Long.parseLong(id));
     }
 

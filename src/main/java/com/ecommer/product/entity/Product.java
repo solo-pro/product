@@ -1,6 +1,8 @@
 package com.ecommer.product.entity;
 
 
+import com.ecommer.product.codegen.types.ProductUpdateInput;
+import io.netty.util.internal.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -65,5 +67,27 @@ public class Product {
     }
     public void delete(){
         this.deleted = true;
+    }
+    public void update(ProductUpdateInput input){
+        if(!StringUtil.isNullOrEmpty(input.getName())){
+            this.name = input.getName();
+        }
+        if(input.getPrice() != null && input.getPrice() > 0){
+            this.price = input.getPrice();
+        }
+        if(input.getStock() != null && input.getStock() > 0){
+            this.stock = input.getStock();
+        }
+        if(!StringUtil.isNullOrEmpty(input.getMainImage())){
+            this.mainImage = input.getMainImage();
+        }
+        if(!StringUtil.isNullOrEmpty(input.getDescription())){
+            this.description = input.getDescription();
+        }
+        if(input.getCategoryId() != null && Long.parseLong(input.getCategoryId()) > 0){
+            this.categoryId = Long.parseLong(input.getCategoryId());
+        }
+        this.updatedTimeStamps = System.currentTimeMillis();
+
     }
 }

@@ -1,7 +1,7 @@
 package com.ecommer.product.service;
 
-import com.ecommer.product.arguments.ProductInput;
-import com.ecommer.product.arguments.ProductUpdateInput;
+import com.ecommer.product.codegen.types.ProductInput;
+import com.ecommer.product.codegen.types.ProductUpdateInput;
 import com.ecommer.product.entity.Product;
 import com.ecommer.product.response.ProductResponse;
 import reactor.core.publisher.Flux;
@@ -16,7 +16,7 @@ public interface ProductService {
             , Integer page
             , Integer size
     );
-    Mono<Product> getProductById(Long id);
+    Mono<ProductResponse> getProductById(Long id);
     Mono<Product> addProduct(ProductInput input);
     Mono<Product> updateProduct(ProductUpdateInput input);
     Mono<Void> deleteProductById(long id);

@@ -37,7 +37,9 @@ private excludedClassFilesForReport(classDirectories) {
                         "**/DgsConstants.class",
                         "**/*Request*",
                         "**/*Response*",
-                        "**/arguments/**"
+                        "**/arguments/**",
+                        "**/entity/**",
+                        "**/codegen/**",
                 ])
             })
     )
@@ -68,11 +70,7 @@ jacocoTestReport {
     dependsOn test
     reports {
         html.required.set(true)
-        xml.required.set(true)
-        csv.required.set(true)
         html.destination jacocoDir.get().file("jacoco/index.html").asFile
-        xml.destination jacocoDir.get().file("jacoco/index.xml").asFile
-        csv.destination jacocoDir.get().file("jacoco/index.csv").asFile
     }
 
     excludedClassFilesForReport(classDirectories)
@@ -178,7 +176,7 @@ dependencyManagement {
 }
 
 generateJava {
-    schemaPaths = ["${projectDir}/src/main/resources/graphql/"]
+    schemaPaths = ["${projectDir}/src/main/resources/schema/"]
     packageName = 'com.ecommer.product.codegen'
     generateClient = true
 }
